@@ -53,4 +53,25 @@ def create_review(store_id):
 # 리뷰를 삭제할 수 도 있음 -> 삭제 요청을 받는 걸 만들어야 함
 @bp.route('/delete_review/<int:review_id>')
 def delete_review(review_id):
-    pass
+    if 'user_id' not in session:
+        flash("권한이 없습니다")
+        return redirect(url_for('main.home'))
+    
+    user_info=rabbitUser.query.filter_by(id=session['user_id']).first()
+    review_info=rabbitReview.query.filter_by(id=review_id).first()
+    
+    if not review_info:
+        flash("잘못된 접근입니다.")
+        return redirect(url_for('main.home'))
+
+    if not user_info or review_info.user_id != session['user_id']:
+        flash("권한이 없습니다.")
+        return redirect(url_for('main.home'))
+
+    db.session.delete(review_info)
+    db.session.commit()
+
+    flash("정상적으로 삭제 되었습니다.")
+    
+    store_info = rabbitStore.query.filter_by(id=review_info.store_id).first()
+    return redirect(url_for("store_detail.store_detail", store_id=store_info.id))
