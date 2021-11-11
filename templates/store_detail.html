@@ -48,6 +48,40 @@
         </table>
         <hr/>
 
+        <!-- 자바스크립트 키는 플랫폼에 등록한 도메인에서만 사용할 수 있고, 이 키만 가지고는 할 수 있는 일이 적음 -->
+        <div id="map" style="height:400px;"></div>
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=af706305b8993165d3c6dda7de6cfd45&libraries=services"></script>
+        <script>
+            const container = document.getElementById('map');
+            const options = {
+                center : new kakao.maps.LatLng(33.450701, 126.570667),
+                level : 3,
+            };
+
+            const map = new kakao.maps.Map(container, options);
+            const geocoder = new kakao.maps.services.Geocoder();
+            
+            geocoder.addressSearch("{{ store_info.location }}", (result, status) => {
+                if (status === kakao.maps.services.Status.OK) {
+                    const position = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                    const marker = new kakao.maps.Marker({
+                        map,
+                        position,
+                    });
+
+                    const info_window = new kakao.maps.InfoWindow({
+                        content: '<div style="width:150px;text-align:center">{{ store_info.name }}</div>'
+                    });
+
+                    info_window.open(map, marker);
+                    map.setCenter(position);
+                }
+            });
+
+            
+        </script>
+
         {% if store_menu %}
             <h3>메뉴</h3>
             <ul>
